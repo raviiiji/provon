@@ -1,7 +1,5 @@
 import ollama
 import os
-import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
 import sys
 
 # Import the document processor and backend systems
@@ -145,23 +143,15 @@ class PurePythonRAG:
             # Calculate similarities
             similarities = []
             
-            if self.has_sentence_transformers and self.embeddings:
-                # Use proper semantic search
-                query_embedding = self.embedding_model.encode([question])[0]
-                for emb in self.embeddings:
-                    if isinstance(emb, np.ndarray):
-                        sim = cosine_similarity([query_embedding], [emb])[0][0]
-                        similarities.append(sim)
-                    else:
-                        similarities.append(0.1)
-            else:
-                # Use keyword matching
-                for chunk_data in self.embeddings:
-                    sim = self.simple_similarity(question, chunk_data)
-                    similarities.append(sim)
+            # Use keyword matching (simple and reliable)
+            for chunk_data in self.embeddings:
+                sim = self.simple_similarity(question, chunk_data)
+                similarities.append(sim)
             
-            # Get top results
-            top_indices = np.argsort(similarities)[-num_results:][::-1]
+            # Get top results (pure Python, no numpy)
+            indexed_sims = [(i, sim) for i, sim in enumerate(similarities)]
+            indexed_sims.sort(key=lambda x: x[1], reverse=True)
+            top_indices = [idx for idx, _ in indexed_sims[:num_results]]
             
             # Build context from top results
             context = ""

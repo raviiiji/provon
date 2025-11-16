@@ -1,4 +1,4 @@
-$token = "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"
+$token = $env:GITHUB_TOKEN  # Use environment variable instead
 $headers = @{
     "Authorization" = "token $token"
     "Accept" = "application/vnd.github.v3+json"

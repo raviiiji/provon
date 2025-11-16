@@ -200,11 +200,10 @@ Your live app: `https://provon-raviiiji.streamlit.app`
 
 ## Your Token (Keep Safe!)
 
-```
-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
-```
-
-⚠️ **Don't share this token publicly!**
+⚠️ **Never commit your token to GitHub!**
+- Store it locally only
+- Use Git Credential Manager to handle it
+- Never paste it in files
 
 ---
 

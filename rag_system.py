@@ -12,12 +12,15 @@ from base_knowledge import BaseKnowledge
 # Try to import sentence-transformers, fallback to simpler method
 HAS_SENTENCE_TRANSFORMERS = False
 try:
+    import warnings
+    warnings.filterwarnings('ignore', category=DeprecationWarning)
     from sentence_transformers import SentenceTransformer
     HAS_SENTENCE_TRANSFORMERS = True
     print("✅ sentence-transformers available")
 except Exception as e:
     print(f"⚠️ sentence-transformers failed: {e}")
     print("⚠️  Using simple keyword-based search")
+    SentenceTransformer = None
 
 class PurePythonRAG:
     def __init__(self):

@@ -207,7 +207,11 @@ ANSWER:"""
                 response = ollama.generate(model='llama2:latest', prompt=prompt)
                 answer = response['response']
             except Exception as e:
-                answer = f"🤖 AI Error: {str(e)}\n\n💡 Make sure Ollama is running with 'ollama serve'"
+                error_msg = str(e)
+                if "Connection refused" in error_msg or "111" in error_msg:
+                    answer = f"⚠️ Ollama is not running\n\n💡 To use this app locally:\n1. Install Ollama from ollama.ai\n2. Run: ollama serve\n3. Pull model: ollama pull llama2:latest\n\n📝 For Streamlit Cloud deployment, you'll need a cloud-hosted LLM API."
+                else:
+                    answer = f"🤖 AI Error: {error_msg}\n\n💡 Make sure Ollama is running with 'ollama serve'"
             
             return {
                 "answer": answer,

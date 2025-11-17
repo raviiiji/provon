@@ -1,6 +1,6 @@
 import os
 from docx import Document
-import fitz  # PyMuPDF
+from pypdf import PdfReader
 
 class DocumentProcessor:
     def __init__(self):
@@ -8,13 +8,12 @@ class DocumentProcessor:
         self.chunk_overlap = 200
     
     def process_pdf(self, file_path):
-        """Extract text from PDF files using PyMuPDF"""
+        """Extract text from PDF files using pypdf"""
         text = ""
         try:
-            doc = fitz.open(file_path)
-            for page in doc:
-                text += page.get_text() + "\n"
-            doc.close()
+            reader = PdfReader(file_path)
+            for page in reader.pages:
+                text += page.extract_text() + "\n"
             return text
         except Exception as e:
             return f"Error reading PDF: {str(e)}"

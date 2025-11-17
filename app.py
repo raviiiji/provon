@@ -6,9 +6,10 @@ import random
 import json
 from rag_system import PurePythonRAG
 
-# Cache buster: 2025-11-17-22-03
+# Version 2.0 - Pure Python, pypdf only, no C compilation
+# Deployment: 2025-11-17 22:39 UTC+5:30
 st.set_page_config(
-    page_title="My Provon - Pure Python",
+    page_title="Provon v2.0 - Pure Python RAG",
     page_icon="🧠",
     layout="wide"
 )

@@ -6,7 +6,7 @@ import random
 import json
 from rag_system import PurePythonRAG
 
-# Set page configuration
+# Cache buster: 2025-11-17-22-03
 st.set_page_config(
     page_title="My Provon - Pure Python",
     page_icon="🧠",

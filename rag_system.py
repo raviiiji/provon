@@ -212,38 +212,30 @@ IMPORTANT RULES:
 ANSWER:"""
             
             # Get response from Ollama (local or cloud)
-            # Uses mistral for cloud (smaller, faster)
-            # For local development with llama2b, change model name below
-            try:
-                # Try mistral first (cloud deployment - smallest model)
-                response = ollama.generate(
-                    model="mistral",
-                    prompt=prompt,
-                    stream=False
-                )
-                answer = response.get("response", "").strip()
-            except Exception as e:
-                # Fallback to neural-chat (medium model)
+            # Try models in order of preference
+            # Cloud: tinyllama (1GB, fast)
+            # Local: llama2b (7GB, better quality)
+            models_to_try = ["tinyllama", "llama2b", "mistral", "neural-chat"]
+            answer = None
+            
+            for model in models_to_try:
                 try:
                     response = ollama.generate(
-                        model="neural-chat",
+                        model=model,
                         prompt=prompt,
                         stream=False
                     )
                     answer = response.get("response", "").strip()
-                except Exception as e2:
-                    # Final fallback to llama2b (local development)
-                    try:
-                        response = ollama.generate(
-                            model="llama2b",
-                            prompt=prompt,
-                            stream=False
-                        )
-                        answer = response.get("response", "").strip()
-                    except Exception as e3:
-                        print(f"⚠️ Ollama error: {e3}")
-                        print(f"⚠️ Make sure Ollama is running: ollama serve")
-                        answer = fallback_answer
+                    print(f"✅ Using model: {model}")
+                    break
+                except Exception as e:
+                    print(f"⚠️ Model {model} not available: {str(e)[:50]}")
+                    continue
+            
+            # If all models fail, use fallback
+            if answer is None:
+                print(f"⚠️ No Ollama models available, using base knowledge")
+                answer = fallback_answer
             
             return {
                 "answer": answer,

@@ -133,9 +133,11 @@ class PurePythonRAG:
         """Query the knowledge base with base knowledge fallback"""
         print(f"🔍 Querying: {question}")
         
+        # Always have a fallback answer ready
+        fallback_answer = self.base_knowledge.get_fallback_answer(question)
+        
         if not self.documents:
             # Fallback to base knowledge
-            fallback_answer = self.base_knowledge.get_fallback_answer(question)
             return {
                 "answer": fallback_answer,
                 "sources": ["Base Knowledge (llama2b)"],
@@ -177,7 +179,6 @@ class PurePythonRAG:
             
             if not context:
                 # Use base knowledge as fallback
-                fallback_answer = self.base_knowledge.get_fallback_answer(question)
                 context = f"📚 From Base Knowledge (llama2b):\n{fallback_answer}\n\n"
                 sources = ["Base Knowledge (llama2b)"]
                 context_chunks = [fallback_answer]

@@ -1,11 +1,11 @@
 FROM ollama/ollama:latest
 
-# Create a startup script
-RUN mkdir -p /app
-RUN echo '#!/bin/bash' > /app/start.sh && \
+# Create startup script that pulls a smaller model
+RUN mkdir -p /app && \
+    echo '#!/bin/bash' > /app/start.sh && \
     echo 'ollama serve &' >> /app/start.sh && \
     echo 'sleep 10' >> /app/start.sh && \
-    echo 'ollama pull neural-chat' >> /app/start.sh && \
+    echo 'ollama pull mistral' >> /app/start.sh && \
     echo 'tail -f /dev/null' >> /app/start.sh && \
     chmod +x /app/start.sh
 

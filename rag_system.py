@@ -212,29 +212,38 @@ IMPORTANT RULES:
 ANSWER:"""
             
             # Get response from Ollama (local or cloud)
-            # Uses neural-chat by default (smaller, faster)
+            # Uses mistral for cloud (smaller, faster)
             # For local development with llama2b, change model name below
             try:
-                # Try neural-chat first (cloud deployment)
+                # Try mistral first (cloud deployment - smallest model)
                 response = ollama.generate(
-                    model="neural-chat",
+                    model="mistral",
                     prompt=prompt,
                     stream=False
                 )
                 answer = response.get("response", "").strip()
             except Exception as e:
-                # Fallback to llama2b (local development)
+                # Fallback to neural-chat (medium model)
                 try:
                     response = ollama.generate(
-                        model="llama2b",
+                        model="neural-chat",
                         prompt=prompt,
                         stream=False
                     )
                     answer = response.get("response", "").strip()
                 except Exception as e2:
-                    print(f"⚠️ Ollama error: {e2}")
-                    print(f"⚠️ Make sure Ollama is running: ollama serve")
-                    answer = fallback_answer
+                    # Final fallback to llama2b (local development)
+                    try:
+                        response = ollama.generate(
+                            model="llama2b",
+                            prompt=prompt,
+                            stream=False
+                        )
+                        answer = response.get("response", "").strip()
+                    except Exception as e3:
+                        print(f"⚠️ Ollama error: {e3}")
+                        print(f"⚠️ Make sure Ollama is running: ollama serve")
+                        answer = fallback_answer
             
             return {
                 "answer": answer,

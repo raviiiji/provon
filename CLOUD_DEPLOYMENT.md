@@ -2,6 +2,90 @@
 
 Deploy your Provon app to the cloud and access it from anywhere!
 
+## Architecture
+- **Streamlit App**: Deployed on Streamlit Cloud
+- **Ollama LLM**: Deployed on Hugging Face Spaces (or other cloud service)
+- **Communication**: Streamlit Cloud → Ollama Cloud via HTTP
+
+## Step 1: Deploy Ollama to Hugging Face Spaces
+
+### 1.1 Create Hugging Face Account
+- Go to https://huggingface.co
+- Sign up (free)
+
+### 1.2 Create a Space
+1. Go to https://huggingface.co/spaces
+2. Click **Create new Space**
+3. Fill in:
+   - **Space name**: `provon-ollama`
+   - **License**: `openrail`
+   - **Space SDK**: `Docker`
+4. Click **Create Space**
+
+### 1.3 Upload Dockerfile
+1. In your new Space, click **Files** → **Add file** → **Upload files**
+2. Upload the `Dockerfile` from your repo
+3. Wait for deployment (5-10 minutes)
+4. Get your Space URL: `https://huggingface.co/spaces/YOUR_USERNAME/provon-ollama`
+5. The actual API URL will be: `https://YOUR_USERNAME-provon-ollama.hf.space`
+
+## Step 2: Update Streamlit Cloud Secrets
+
+1. Go to https://share.streamlit.io/
+2. Find your **provon** app
+3. Click **⋮** → **Settings** → **Secrets**
+4. Add:
+   ```toml
+   OLLAMA_HOST = "https://YOUR_USERNAME-provon-ollama.hf.space"
+   ```
+5. Save
+
+## Step 3: Redeploy Streamlit Cloud
+
+1. Go to Streamlit Cloud dashboard
+2. Click **provon** app
+3. Click **⋮** → **Reboot app**
+4. Wait for deployment
+
+## Step 4: Test
+
+1. Open https://provon.streamlit.app/
+2. Ask a question
+3. The app will connect to your cloud-hosted Ollama
+
+## Troubleshooting
+
+**Error: "Ollama not running"**
+- Check that your Hugging Face Space is running
+- Verify the URL is correct in Streamlit secrets
+
+**Slow responses**
+- Hugging Face free tier has limited resources
+- Responses may take 30-60 seconds
+- Consider upgrading to a paid tier for faster responses
+
+**Model not loading**
+- Hugging Face Spaces have limited disk space
+- llama2b is ~4GB, should fit in free tier
+- If it fails, use a smaller model like `neural-chat`
+
+## Alternative: Use Replicate API (Easier)
+
+Instead of hosting Ollama, use Replicate's API:
+
+```python
+import replicate
+
+response = replicate.run(
+    "meta/llama-2-7b-chat:13c3cdee13ee059ab779f0291d29054dab00a47da31d6ac07b5b88f2d9148eac",
+    input={"prompt": "Your question here"}
+)
+```
+
+Get API key from https://replicate.com and add to Streamlit secrets.
+
+---
+
 ## Option 1: Streamlit Cloud (Easiest) ⭐ RECOMMENDED
 
 ### Step 1: Push to GitHub

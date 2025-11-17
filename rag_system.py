@@ -2,6 +2,10 @@ import ollama
 import os
 import sys
 
+# Configure Ollama URL - use environment variable or default to localhost
+OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+ollama.host = OLLAMA_HOST
+
 # Import the document processor and backend systems
 from document_processor import DocumentProcessor
 from backend_db import BackendDatabase

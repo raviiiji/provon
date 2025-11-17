@@ -1,9 +1,13 @@
 FROM ollama/ollama:latest
 
-# Pull a lightweight model (neural-chat is smaller than llama2b)
-# neural-chat: ~4GB, faster responses
-# If you want llama2b instead, uncomment below and comment out neural-chat
-RUN ollama pull neural-chat
+# Create startup script
+RUN mkdir -p /app && \
+    echo '#!/bin/bash' > /app/start.sh && \
+    echo 'ollama serve &' >> /app/start.sh && \
+    echo 'sleep 15' >> /app/start.sh && \
+    echo 'ollama pull neural-chat' >> /app/start.sh && \
+    echo 'wait' >> /app/start.sh && \
+    chmod +x /app/start.sh
 
 # Expose the API port
 EXPOSE 11434
@@ -11,5 +15,5 @@ EXPOSE 11434
 # Set environment to allow external connections
 ENV OLLAMA_HOST=0.0.0.0:11434
 
-# Start Ollama service
-CMD ["ollama", "serve"]
+# Start with the script
+ENTRYPOINT ["/app/start.sh"]

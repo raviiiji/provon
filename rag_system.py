@@ -200,18 +200,30 @@ IMPORTANT RULES:
 
 ANSWER:"""
             
-            # Get response from local Ollama with custom model
+            # Get response from Ollama (local or cloud)
+            # Uses neural-chat by default (smaller, faster)
+            # For local development with llama2b, change model name below
             try:
+                # Try neural-chat first (cloud deployment)
                 response = ollama.generate(
-                    model="llama2b",
+                    model="neural-chat",
                     prompt=prompt,
                     stream=False
                 )
                 answer = response.get("response", "").strip()
             except Exception as e:
-                print(f"⚠️ Ollama error: {e}")
-                print(f"⚠️ Make sure Ollama is running: ollama serve")
-                answer = fallback_answer
+                # Fallback to llama2b (local development)
+                try:
+                    response = ollama.generate(
+                        model="llama2b",
+                        prompt=prompt,
+                        stream=False
+                    )
+                    answer = response.get("response", "").strip()
+                except Exception as e2:
+                    print(f"⚠️ Ollama error: {e2}")
+                    print(f"⚠️ Make sure Ollama is running: ollama serve")
+                    answer = fallback_answer
             
             return {
                 "answer": answer,

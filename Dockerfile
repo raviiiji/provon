@@ -1,7 +1,9 @@
 FROM ollama/ollama:latest
 
-# Pull the model during build
-RUN ollama pull llama2b
+# Pull a lightweight model (neural-chat is smaller than llama2b)
+# neural-chat: ~4GB, faster responses
+# If you want llama2b instead, uncomment below and comment out neural-chat
+RUN ollama pull neural-chat
 
 # Expose the API port
 EXPOSE 11434

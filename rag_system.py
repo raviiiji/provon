@@ -1,10 +1,21 @@
-import ollama
 import os
 import sys
+import requests
+
+# Try to import ollama for local use
+try:
+    import ollama
+    OLLAMA_AVAILABLE = True
+except:
+    OLLAMA_AVAILABLE = False
 
 # Configure Ollama URL - use environment variable or default to localhost
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-ollama.host = OLLAMA_HOST
+if OLLAMA_AVAILABLE:
+    ollama.host = OLLAMA_HOST
+
+# Replicate API key for cloud deployment
+REPLICATE_API_KEY = os.getenv("REPLICATE_API_KEY", "")
 
 # Import the document processor and backend systems
 from document_processor import DocumentProcessor
@@ -200,19 +211,38 @@ IMPORTANT RULES:
 
 ANSWER:"""
             
-            # Get response from Ollama
-            try:
-                response = ollama.generate(
-                    model="llama2b",
-                    prompt=prompt,
-                    stream=False
-                )
-                answer = response.get("response", "").strip()
-            except ConnectionRefusedError:
-                print(f"⚠️ Ollama not running. Start it with: ollama run llama2b")
-                answer = fallback_answer
-            except Exception as e:
-                print(f"⚠️ Ollama error: {e}")
+            # Get response from LLM (Ollama or Replicate)
+            answer = None
+            
+            # Try Ollama first (for local development)
+            if OLLAMA_AVAILABLE:
+                try:
+                    response = ollama.generate(
+                        model="llama2b",
+                        prompt=prompt,
+                        stream=False
+                    )
+                    answer = response.get("response", "").strip()
+                    print("✅ Using local Ollama")
+                except Exception as e:
+                    print(f"⚠️ Ollama error: {e}")
+            
+            # Fallback to Replicate API (for cloud deployment)
+            if answer is None and REPLICATE_API_KEY:
+                try:
+                    import replicate
+                    output = replicate.run(
+                        "meta/llama-2-7b-chat:13c3cdee13ee059ab779f0291d29054dab00a47da31d6ac07b5b88f2d9148eac",
+                        input={"prompt": prompt}
+                    )
+                    answer = "".join(output).strip() if output else ""
+                    print("✅ Using Replicate API")
+                except Exception as e:
+                    print(f"⚠️ Replicate error: {e}")
+            
+            # Final fallback to base knowledge
+            if answer is None or not answer:
+                print("⚠️ Using base knowledge fallback")
                 answer = fallback_answer
             
             return {

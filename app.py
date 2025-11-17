@@ -6,13 +6,27 @@ import random
 import json
 from rag_system import PurePythonRAG
 
-# Version 2.0 - Pure Python, pypdf only, no C compilation
-# Deployment: 2025-11-17 22:39 UTC+5:30
+# Version 2.1 - Pure Python, pypdf only, no C compilation
+# Deployment: 2025-11-18 04:30 UTC+5:30
 st.set_page_config(
-    page_title="Provon v2.0 - Pure Python RAG",
+    page_title="Provon v2.1 - Pure Python RAG",
     page_icon="🧠",
     layout="wide"
 )
+
+# Check Ollama connection status
+import requests
+OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+try:
+    response = requests.get(f"{OLLAMA_HOST}/api/tags", timeout=3)
+    if response.status_code == 200:
+        models = response.json().get("models", [])
+        if not models:
+            st.warning("⚠️ Ollama is running but NO MODELS loaded. Please wait a moment and refresh.")
+    else:
+        st.error(f"❌ Ollama error: {response.status_code}")
+except Exception as e:
+    st.error(f"❌ Cannot connect to Ollama at {OLLAMA_HOST}. Using base knowledge only.")
 
 # Fun loading messages while AI thinks
 LOADING_MESSAGES = [

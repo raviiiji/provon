@@ -1,10 +1,21 @@
 import ollama
 import os
 import sys
+import requests
 
 # Configure Ollama host - use environment variable or default to localhost
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+print(f"🔗 Ollama Host: {OLLAMA_HOST}")
+
+# Set ollama host
 ollama.host = OLLAMA_HOST
+
+# Test connection
+try:
+    response = requests.get(f"{OLLAMA_HOST}/api/tags", timeout=5)
+    print(f"✅ Ollama connected: {response.status_code}")
+except Exception as e:
+    print(f"⚠️ Ollama connection error: {e}")
 
 # Import the document processor and backend systems
 from document_processor import DocumentProcessor

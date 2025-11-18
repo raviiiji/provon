@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: provon-ollama
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/tags
+    envVars:
+      - key: OLLAMA_HOST
+        value: 0.0.0.0:11434

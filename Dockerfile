@@ -7,4 +7,4 @@ EXPOSE 11434
 ENV OLLAMA_HOST=0.0.0.0:11434
 
 # Start Ollama and pull tinyllama
-CMD sh -c "ollama serve & sleep 20 && ollama pull tinyllama && wait"
+CMD sh -c "ollama serve & sleep 30 && ollama pull tinyllama && wait"

@@ -1,14 +1,21 @@
-import ollama
 import os
 import sys
 import requests
+
+# Try to import ollama for local use
+try:
+    import ollama
+    OLLAMA_AVAILABLE = True
+except:
+    OLLAMA_AVAILABLE = False
 
 # Configure Ollama host - use environment variable or default to localhost
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 print(f"🔗 Ollama Host: {OLLAMA_HOST}")
 
-# Set ollama host
-ollama.host = OLLAMA_HOST
+# Set ollama host if available
+if OLLAMA_AVAILABLE:
+    ollama.host = OLLAMA_HOST
 
 # Test connection
 try:
@@ -16,6 +23,9 @@ try:
     print(f"✅ Ollama connected: {response.status_code}")
 except Exception as e:
     print(f"⚠️ Ollama connection error: {e}")
+
+# Groq API for cloud inference (free tier available)
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 
 # Import the document processor and backend systems
 from document_processor import DocumentProcessor
@@ -211,30 +221,48 @@ IMPORTANT RULES:
 
 ANSWER:"""
             
-            # Get response from Ollama (local or cloud)
-            # Try models in order of preference
-            # Cloud: tinyllama (1GB, fast)
-            # Local: llama2b (7GB, better quality)
-            models_to_try = ["tinyllama", "llama2b", "mistral", "neural-chat"]
+            # Get response from LLM (Ollama local or Groq cloud)
             answer = None
             
-            for model in models_to_try:
-                try:
-                    response = ollama.generate(
-                        model=model,
-                        prompt=prompt,
-                        stream=False
-                    )
-                    answer = response.get("response", "").strip()
-                    print(f"✅ Using model: {model}")
-                    break
-                except Exception as e:
-                    print(f"⚠️ Model {model} not available: {str(e)[:50]}")
-                    continue
+            # Try local Ollama first (for development)
+            if OLLAMA_AVAILABLE:
+                models_to_try = ["llama2b", "mistral", "neural-chat", "tinyllama"]
+                for model in models_to_try:
+                    try:
+                        response = ollama.generate(
+                            model=model,
+                            prompt=prompt,
+                            stream=False
+                        )
+                        answer = response.get("response", "").strip()
+                        print(f"✅ Using local Ollama model: {model}")
+                        break
+                    except Exception as e:
+                        print(f"⚠️ Local model {model} not available: {str(e)[:50]}")
+                        continue
             
-            # If all models fail, use fallback
+            # Fallback to Groq API (for cloud deployment)
+            if answer is None and GROQ_API_KEY:
+                try:
+                    from groq import Groq
+                    client = Groq(api_key=GROQ_API_KEY)
+                    response = client.chat.completions.create(
+                        model="mixtral-8x7b-32768",  # Free tier model
+                        messages=[
+                            {"role": "system", "content": "You are a helpful assistant. Answer based ONLY on the provided context."},
+                            {"role": "user", "content": prompt}
+                        ],
+                        temperature=0.7,
+                        max_tokens=500
+                    )
+                    answer = response.choices[0].message.content.strip()
+                    print(f"✅ Using Groq API (cloud)")
+                except Exception as e:
+                    print(f"⚠️ Groq API error: {str(e)[:50]}")
+            
+            # Final fallback to base knowledge
             if answer is None:
-                print(f"⚠️ No Ollama models available, using base knowledge")
+                print(f"⚠️ No LLM available, using base knowledge")
                 answer = fallback_answer
             
             return {
